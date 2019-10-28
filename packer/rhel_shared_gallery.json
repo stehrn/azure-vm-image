@@ -1,12 +1,17 @@
 {
     "variables": {
+
       "client_id": "{{env `ARM_CLIENT_ID`}}",
       "client_secret": "{{env `ARM_CLIENT_SECRET`}}",
       "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
       "tenant_id": "{{env `ARM_TENANT_ID`}}",
-      "ssh_user": "centos",
-      "ssh_pass": "{{env `ARM_SSH_PASS`}}"
+
+      "ssh_user": "azureuser",
+      "ssh_pass": "{{env `ARM_SSH_PASS`}}",
+      
+      "nginx": "{{env `NGINX_RPM`}}"
     },
+    "sensitive-variables": ["client_secret", "ssh_pass"],
     "builders": [{
       "type": "azure-arm",
       
@@ -38,7 +43,31 @@
       "location": "westeurope",
       "vm_size": "Standard_DS2_v2"
     }],
-    "provisioners": [{
+    "provisioners": [
+      {
+        "type": "shell-local",
+        "command": "curl -o /tmp/{{user `nginx`}} https://nginx.org/packages/rhel/7/x86_64/RPMS/{{user `nginx`}}"
+      },
+      {
+      "source": "/tmp/{{user `nginx`}}",
+      "destination": "/tmp/{{user `nginx`}}",
+      "generated" : true,
+      "type": "file"
+      },
+      {
+        "type": "shell-local",
+        "command": "rm /tmp/{{user `nginx`}}"
+      },
+      {
+        "execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -S -E sh '{{ .Path }}'",
+        "inline": [
+          "rpm -i /tmp/{{user `nginx`}}",
+          "rm /tmp/{{user `nginx`}}"
+        ],
+        "inline_shebang": "/bin/sh -x",
+        "type": "shell",
+        "skip_clean": true
+      },{
       "execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -S -E sh '{{ .Path }}'",
       "inline": [
         "yum update -y",
@@ -47,5 +76,6 @@
       "inline_shebang": "/bin/sh -x",
       "type": "shell",
       "skip_clean": true
-    }]
+    }
+    ]
   }

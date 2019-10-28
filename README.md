@@ -43,7 +43,67 @@ terraform init
 terraform apply
 ```
 
+Set Verison of RHEL
+Whats available?
+```
+az vm image list --publisher RedHat --all
+```
+
+Set verison of nginx:
+```
+export NGINX_RPM=nginx-1.12.1-1.el7.ngx.x86_64.rpm 
+```
 Trigger packer build:
 ```
-./packer build packer/rhel.json
+./packer build packer/rhel_shared_gallery.json
 ```
+
+Check image in shared image gallery
+```
+az resource list --resource-group "ImageResourceGroup" 
+```
+
+
+
+TODO:
+
+Create vm
+
+https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-create-complete-vm
+
+Good 
+https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/virtual-machines/linux/shared-images.md
+https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/virtual-machines/linux/tutorial-govern-resources.md
+https://github.com/terraform-providers/terraform-provider-azurerm/tree/master/examples/virtual-machines
+
+
+add
+
+boot_diagnostics {
+        enabled = "true"
+        storage_uri = "${azurerm_storage_account.test.primary_blob_endpoint}"
+    }
+
+
+https://github.com/terraform-providers/terraform-provider-azurerm/issues/2249
+
+OSType: Linux
+ManagedImageResourceGroupName: ImageResourceGroup
+ManagedImageName: MyRedHatOSSharedImage
+ManagedImageId: /subscriptions/bd305057-b5da-461e-b4e7-8079ea435f03/resourceGroups/ImageResourceGroup/providers/Microsoft.Compute/images/MyRedHatOSSharedImage
+ManagedImageLocation: westeurope
+ManagedImageSharedImageGalleryId: /subscriptions/bd305057-b5da-461e-b4e7-8079ea435f03/resourceGroups/ImageResourceGroup/providers/Microsoft.Compute/galleries/VMSharedImageGallery/images/RedHatImage/versions/1.0.0
+
+
+ storage_image_reference {
+    publisher = "${var.image_publisher}"
+    offer     = "${var.image_offer}"
+    sku       = "${var.image_sku}"
+    version   = "${var.image_version}"
+  }
+
+
+  terraform apply -var-file="terraform.tfvars"
+
+cd tf/modules/virtual-machine
+terraform apply -var-file="../../terraform.tfvars"

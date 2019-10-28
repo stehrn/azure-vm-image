@@ -4,9 +4,10 @@
       "client_secret": "{{env `ARM_CLIENT_SECRET`}}",
       "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
       "tenant_id": "{{env `ARM_TENANT_ID`}}",
-      "ssh_user": "centos",
+      "ssh_user": "admin",
       "ssh_pass": "{{env `ARM_SSH_PASS`}}"
     },
+    "sensitive-variables": ["client_secret", "ssh_pass"],
     "builders": [{
       "type": "azure-arm",
       
